@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum TicketStatus {
+  PURCHASED
+  CONFIRMED
+  CANCELLED
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String
+  email     String   @unique
+  password  String
+  role      Role     @default(USER)
+  venues    Venue[]
+  events    Event[]
+  tickets   Ticket[]
+  createdAt DateTime @default(now())
+}
+
+model Venue {
+  id        Int      @id @default(autoincrement())
+  name      String
+  address   String
+  capacity  Int
+  createdBy Int
+  creator   User     @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  events    Event[]
+  createdAt DateTime @default(now())
+}
+
+model Event {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  eventDate   DateTime
+  venueId     Int
+  createdBy   Int
+  venue       Venue    @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  creator     User     @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  tickets     Ticket[]
+  createdAt   DateTime @default(now())
+
+  @@unique([title, eventDate, venueId])
+}
+
+model Ticket {
+  id        Int          @id @default(autoincrement())
+  price     Decimal      @db.Decimal(10, 2)
+  status    TicketStatus @default(PURCHASED)
+  eventId   Int
+  userId    Int
+  event     Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime     @default(now())
+
+  @@unique([eventId, userId])
+}
