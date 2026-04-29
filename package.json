@@ -7,7 +7,10 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "dev": "node --env-file=.env --watch src/server.js"
+    "start": "node src/server.js",
+    "dev": "node --env-file=.env --watch src/server.js",
+    "seed": "node prisma/seed.js",
+    "render-build": "npm install && npx prisma generate && npx prisma migrate deploy && npm run seed"
   },
   "devDependencies": {
     "@eslint/js": "^9.29.0",
